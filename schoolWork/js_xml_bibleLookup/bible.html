@@ -1,6 +1,5 @@
 <!-- XMLbible.html
- -- James Skon April 23, 2011
- -- Extended by Jay Myser 2016
+ -- Jay Myser 2016
  -- Mount Vernon Nazarene University
  -->
 <?xml version="1.0" encoding="UTF-8"?>
@@ -133,7 +132,7 @@ return(verseOutput);
 }
 
 function retrStrongs(n,langKey){
-  
+
   var strongsOutput = " ";
   var pronounciationOutput = "<h3>Pronunciation</h3> ";
   var descriptionOutput = "<h3>Description</h3> ";
@@ -153,9 +152,9 @@ function retrStrongs(n,langKey){
   xmlhttp.send();
   xmlDoc=xmlhttp.responseXML;
   var resultNode = xmlDoc.querySelector("[id=" + id + "]");
-  
+
   // process each child of strongs element
-  for (k=0; k < resultNode.childNodes.length; k++) {  
+  for (k=0; k < resultNode.childNodes.length; k++) {
 
     // inner loop handles the children of outer loop
     for (m=0; m < resultNode.childNodes.length; m++) {
@@ -194,7 +193,7 @@ function retrStrongs(n,langKey){
                   //descriptionOutput += "<a id=\""+linkNode+"\" href=\"#\" onclick=\"retrStrongs("+linkNodeNum+",langKey);return false;\">";
                   // descriptionOutput += resultNode.childNodes[k].childNodes[m].childNodes[0].nodeValue;
                   // descriptionOutput += "</a></b></i>";
-                  
+
                   descriptionOutput += "<i>";
                   descriptionOutput += resultNode.childNodes[k].childNodes[m].childNodes[0].nodeValue;
                   descriptionOutput += "</i> ";
@@ -203,7 +202,7 @@ function retrStrongs(n,langKey){
                 descriptionOutput += resultNode.childNodes[k].childNodes[m].nodeValue;
              }
         }
-        
+
       }
 
     }//end inner loop
@@ -346,7 +345,7 @@ function refGetVerse(b,c,v){
 <option value="66">Revelation
 </select>
 
-<input name="chapter" type="text" MAXLENGTH=3  id=chapter> : 
+<input name="chapter" type="text" MAXLENGTH=3  id=chapter> :
 <input name="verse" type="text" MAXLENGTH=3 id=verse> Number of Verses:
 <input name="numVerse" type="text" MAXLENGTH=3 id=numVerse>
 <input type="submit" onclick="javascript: getresponse()" name="submit" value="Submit" />
