@@ -1,0 +1,30 @@
+form 
+{ display: table; border-spacing: 1em;
+  border: thin dashed black;
+  background-color: white;
+}
+form > div.entry { display: table-row }
+
+div.entry > label 
+{ display: table-cell; text-align: right; 
+  font-weight: bold;
+}
+
+div.entry > input 
+{ display: table-cell; font-family: monospace; }
+
+div.entry > input:hover,
+div.entry > input:focus,
+div.entry > span.field > input:hover,
+div.entry > span.field > input:focus
+{ background-color: #def; }
+
+div.entry > span.field { display: table-cell; }
+
+div.entry > span.field > label
+{  padding-right: 0.5em;  margin-right: 0.5em;  
+   border: thin dashed transparent; }
+
+div.entry > span.field > label:hover { border: thin dashed black; }
+
+.fixthis { color: darkred;  font-weight: bold; }

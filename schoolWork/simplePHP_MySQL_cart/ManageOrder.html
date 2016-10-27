@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head> 
+<meta charset="utf-8"/>
+<title>Managing Orders</title> 
+</head>
+<body style="margin: 50px">
+<h1>Managing Orders</h1>
+<p>See these functions in the file 
+<a href="manageOrder.phps">manageOrder.php</a>:
+</p> 
+<pre>
+function checkoutForm(&$items,$gateway, $hidden)---generates checkout form
+function cartTable(&$items,$action)---generates shopping cart display
+function orderTable($order)---displays order recorded in database
+function changeQty($order, $product, $qty)---changes quantity of an order
+function removeItem($order, $product)---removes an item in an order
+function addItem($order, $product, $qty)---adds an into to an order
+function newOrder($order, $customer)---creats a new order in the database
+function enterOrder($order, $customer, &$cart)---enters a customer order
+after checkout.
+function removeOrder($order)---removes an order from the dataase.
+function value_from_db($q)---retrives a value from database.
+function htmlCheckout(&$result_obj, $item_name, $amt_name, ... )---generates
+HTML for checkout display and PayPal interface.
+</pre>
+<p>And also see the <a href="../HTMLCode.html">HTML code generation</a>.</p>
+</body></html>

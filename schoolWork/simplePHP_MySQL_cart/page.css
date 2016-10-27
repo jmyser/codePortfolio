@@ -1,0 +1,14 @@
+table.db
+{ border: thin solid black;
+  border-collapse: collapse;
+  border-spacing: 1em;
+}
+
+table.db td
+{  text-align: right  }
+
+table.db td, table.db th
+{  padding: 1em;  }
+
+table.db th 
+{  background-color: #def;  }

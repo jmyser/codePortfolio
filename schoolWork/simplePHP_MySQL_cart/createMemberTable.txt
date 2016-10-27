@@ -1,0 +1,13 @@
+CREATE TABLE member
+(
+	uid VARCHAR(10), 
+	lastname VARCHAR(25),
+	firstname VARCHAR(15), 
+	email VARCHAR(35) NOT NULL UNIQUE,
+	password VARBINARY(48),
+	address VARCHAR(35), 
+	state VARCHAR(2), 
+	zip VARCHAR(5), 
+	status ENUM('active', 'inactive') DEFAULT 'active',
+	PRIMARY KEY (uid)
+);
