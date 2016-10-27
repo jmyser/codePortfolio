@@ -1,0 +1,366 @@
+<!-- XMLbible.html
+ -- James Skon April 23, 2011
+ -- Extended by Jay Myser 2016
+ -- Mount Vernon Nazarene University
+ -->
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<html>
+<head>
+<title>Holy Bible Strongs Lookup</title>
+<link rel="stylesheet" type="text/css" href="./bible.css" />
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+<script type="text/javascript">
+function setup() {
+  if (window.XMLHttpRequest)
+   {// code for IE7+, Firefox, Chrome, Opera, Safari
+    xmlhttp=new XMLHttpRequest();
+    }
+  else
+    {// code for IE6, IE5
+    xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+    }
+  biblePath="/classes/csc3004/XMLBible/kjv_by_book/";
+  hebPath="/classes/csc3004/XMLBible/heb_strongs/";
+  greekPath="/classes/csc3004/XMLBible/greek_strongs/";
+  otPath="/classes/csc3004/XMLBible/bible_refs_of_strongs_numbers/bible_refs_by_strongs_num_ot.xml";
+  ntPath="/classes/csc3004/XMLBible/bible_refs_of_strongs_numbers/bible_refs_by_strongs_num_nt.xml";
+}
+
+function getresponse () {
+
+  var b=parseInt(document.getElementById('book').value);
+  var c=parseInt(document.getElementById('chapter').value);
+  var v=parseInt(document.getElementById('verse').value);
+  var n=parseInt(document.getElementById('numVerse').value);
+
+  var XMLBook = biblePath + b + ".xml";
+  xmlhttp.open("GET",XMLBook,false);
+  xmlhttp.send();
+  xmlDoc=xmlhttp.responseXML;
+
+
+  document.all.verseColumn.innerHTML ="<p>Please enter valid numbers.</p>";
+  document.all.strongColumn.innerHTML ="<p>Click a Strong's number to the left for information.</p>";
+  document.all.refColumn.innerHTML ="<p>Refrences linked to that Strong's will appear here.</p>";
+
+  var i = 0;
+  try {
+    document.all.verseColumn.innerHTML =" ";
+    var displayBook = xmlDoc.getElementsByTagName("book")[0].getAttribute("name");
+    var displayChap = xmlDoc.getElementsByTagName("chapter")[c-1].getAttribute("number");
+    document.all.verseColumn.innerHTML +="<h2>"+displayBook+"</h2>";
+    document.all.verseColumn.innerHTML +="<h3>Chapter "+displayChap+"</h3>";
+    document.all.verseColumn.innerHTML +="<p>";
+    for (i = 0; i < n;i++) {
+      vtext = getVerse(b,c,v+i);
+      document.all.verseColumn.innerHTML += vtext;
+    }
+    document.all.verseColumn.innerHTML +="</p>";
+  }
+  catch(error) {
+    if (error == "no chapter") {
+      if (i == 0)
+        document.all.verseColumn.innerHTML += "<b><i>No such chapter "+c+"</i></b>";
+    }
+    if (error == "no verse") {
+      if (i == 0)
+        document.all.verseColumn.innerHTML += "<b><i>No such verse "+(v+i)+"</i></b>";
+    }
+  }
+}
+
+function getVerse(bk,ch,ver)
+{
+  var verseOutput = " ";
+  // = xmlDoc.getElementsByTagName("book")[0].getAttribute("name");
+  var c=xmlDoc.getElementsByTagName("chapter")[ch-1];
+  if (c==null) throw "no chapter";
+  verseOutput += " ";
+  // verseOutput += c.getAttribute("number");
+  var v=c.getElementsByTagName("verse")[ver-1];
+  if (v==null) throw "no verse";
+  // verseOutput += ":";
+  verseOutput += v.getAttribute("number");
+  verseOutput += " ";
+  for (j=0; j<v.childNodes.length;j++) {
+    if (v.childNodes[j].nodeType == 3) {
+        verseOutput += v.childNodes[j].nodeValue;
+        verseOutput += " ";
+    }
+    if (v.childNodes[j].nodeType == 1) {
+        if (v.childNodes[j].nodeName=="em") {
+           verseOutput += "<i>";
+           verseOutput += v.childNodes[j].childNodes[0].nodeValue;
+           verseOutput += "</i> ";
+        }
+        if (v.childNodes[j].nodeName=="strongs") {
+          origLang = "";
+           if (v.childNodes[j].childNodes[0] != null) {
+             verseOutput += v.childNodes[j].childNodes[0].nodeValue;
+           }
+           // use hasAttribute(attributename) to figure out the right attribute
+           if (v.childNodes[j].hasAttribute("hebrew")) {
+             strNum = v.childNodes[j].getAttribute("hebrew");
+             origLang = 'h';
+             verseOutput += "<i><font size=1 color=#516C8E><sub>";
+             verseOutput += "<a id=\""+strNum+"\" href=\"#\" onclick=\"retrStrongs("+strNum+",origLang);return false;\">";
+             verseOutput += v.childNodes[j].getAttribute("hebrew");
+             verseOutput += "</a>";
+             verseOutput += "</sub></font></i> ";
+           }
+           if (v.childNodes[j].hasAttribute("greek")) {
+             strNum = v.childNodes[j].getAttribute("greek");
+             origLang = 'g';
+             verseOutput += "<i><font size=1 color=#2A4E36><sub>";
+             verseOutput += "<a id=\""+strNum+"\" href=\"#\" onclick=\"retrStrongs("+strNum+",origLang);return false;\">";
+             verseOutput += v.childNodes[j].getAttribute("greek");
+             verseOutput += "</a>";
+             verseOutput += "</sub></font></i> ";
+           }
+           if (v.childNodes[j].hasAttribute("number")) {
+             verseOutput += "<i><font size=1 color=teal><sub>";
+             verseOutput += v.childNodes[j].getAttribute("number");
+             verseOutput += "</sub></font></i> ";
+           }
+       }
+    }
+
+}
+return(verseOutput);
+}
+
+function retrStrongs(n,langKey){
+  
+  var strongsOutput = " ";
+  var pronounciationOutput = "<h3>Pronunciation</h3> ";
+  var descriptionOutput = "<h3>Description</h3> ";
+
+  var inputNum = n;
+  var XMLnum = Math.ceil(inputNum/100) - 1;
+  var id = "";
+  if (langKey == 'h'){
+    var strongBook = hebPath + "heb" + XMLnum + ".xml";
+    id = "H" + n;
+  }
+  else {
+    var strongBook = greekPath + "grk" + XMLnum + ".xml";
+    id = "G" + n;
+  }
+  xmlhttp.open("GET",strongBook,false);
+  xmlhttp.send();
+  xmlDoc=xmlhttp.responseXML;
+  var resultNode = xmlDoc.querySelector("[id=" + id + "]");
+  
+  // process each child of strongs element
+  for (k=0; k < resultNode.childNodes.length; k++) {  
+
+    // inner loop handles the children of outer loop
+    for (m=0; m < resultNode.childNodes.length; m++) {
+      if (resultNode.childNodes[k].childNodes[m] != null) {
+        if (resultNode.childNodes[k].nodeName=="strong_id") {
+             strongsOutput += "<h2>";
+             strongsOutput += resultNode.childNodes[k].childNodes[m].nodeValue;
+             strongsOutput += "</h2> ";
+        }
+        if (resultNode.childNodes[k].nodeName=="title") {
+             strongsOutput += "<h1>";
+             strongsOutput += resultNode.childNodes[k].childNodes[m].nodeValue;
+             strongsOutput += "</h1> ";
+        }
+        if (resultNode.childNodes[k].nodeName=="pronunciation") {
+             if (resultNode.childNodes[k].childNodes[m].nodeName=="em") {
+                  pronounciationOutput += "<i>";
+                  pronounciationOutput += resultNode.childNodes[k].childNodes[m].childNodes[0].nodeValue;
+                  pronounciationOutput += "</i> ";
+             }
+             else {
+                pronounciationOutput += resultNode.childNodes[k].childNodes[m].nodeValue;
+             }
+        }
+        if (resultNode.childNodes[k].nodeName=="description") {
+             if (resultNode.childNodes[k].childNodes[m].nodeName=="em") {
+                  descriptionOutput += "<i>";
+                  descriptionOutput += resultNode.childNodes[k].childNodes[m].childNodes[0].nodeValue;
+                  descriptionOutput += "</i> ";
+             }
+             else if (resultNode.childNodes[k].childNodes[m].nodeName=="link") {
+                  //var linkNode = resultNode.childNodes[k].childNodes[m].childNodes[0].nodeValue;
+                  //// trim G or H off front of link node and make an int
+                  //var linkNodeNum=parseInt(linkNode.substr(1));
+                  //descriptionOutput += "<i><b>";
+                  //descriptionOutput += "<a id=\""+linkNode+"\" href=\"#\" onclick=\"retrStrongs("+linkNodeNum+",langKey);return false;\">";
+                  // descriptionOutput += resultNode.childNodes[k].childNodes[m].childNodes[0].nodeValue;
+                  // descriptionOutput += "</a></b></i>";
+                  
+                  descriptionOutput += "<i>";
+                  descriptionOutput += resultNode.childNodes[k].childNodes[m].childNodes[0].nodeValue;
+                  descriptionOutput += "</i> ";
+             }
+             else {
+                descriptionOutput += resultNode.childNodes[k].childNodes[m].nodeValue;
+             }
+        }
+        
+      }
+
+    }//end inner loop
+  }//end outer loop
+
+  document.all.strongColumn.innerHTML = " " + strongsOutput + pronounciationOutput + descriptionOutput;
+  retrRefs(inputNum, langKey);
+}
+
+function retrRefs(n,langKey){
+  var inputNum = n;
+  var refBook = " ";
+  var refOutput = "<hr>";
+  refOutput += "<h3>Refrences</h3> "
+  if (langKey == 'h'){
+    refBook = otPath;
+  }
+  else {
+    refBook = ntPath;
+  }
+  xmlhttp.open("GET",refBook,false);
+  xmlhttp.send();
+  xmlDoc=xmlhttp.responseXML;
+
+    var item = xmlDoc.getElementsByTagName('concordance')[0].getElementsByTagName('item')[inputNum-1];
+
+    var refs = item.children;
+
+    for(var e = 0; e < refs.length; e++) {
+      var refB = parseInt(refs[e].getAttribute('b'));
+      var refC = parseInt(refs[e].getAttribute('ch'));
+      var refV = parseInt(refs[e].getAttribute('v'));
+
+      var bookName = getBookName(refB);
+      // refOutput += "<p>";
+      // refOutput += " " +bookName+ " " +refC+ ":" +refV;
+      // refOutput += "</p>";
+      refOutput += "<p><font color=#516C8E>";
+      refOutput += "<a id=\""+refB+refC+refV+"\" href=\"#\" onclick=\"refGetVerse("+refB+","+refC+","+refV+");return false;\">";
+      refOutput += bookName+ " " +refC+ ":" +refV;
+      refOutput += "</a>";
+      refOutput += "</font></p>";
+    }
+  document.all.refColumn.innerHTML = " " + refOutput;
+}
+
+function getBookName(bookNum){
+  var booklist = ['Genesis', 'Exodus', 'Leviticus', 'Numbers', 'Deuteronomy', 'Joshua', 'Judges', 'Ruth', '1st Samuel', '2nd Samuel', '1st Kings', '2nd Kings', '1st Chronicles', '2nd Chronicles', 'Ezra', 'Nehemiah', 'Esther', 'Job', 'Psalms', 'Proverbs', 'Ecclesiastes', 'Song of Solomon', 'Isaiah', 'Jeremiah', 'Lamentations', 'Ezekiel', 'Daniel', 'Hosea', 'Joel', 'Amos', 'Obadiah', 'Jonah', 'Micah', 'Nahum', 'Habakkuk', 'Zephaniah', 'Haggai', 'Zechariah', 'Malachi', 'Matthew', 'Mark', 'Luke', 'John', 'Acts', 'Romans', '1st Corinthians', '2nd Corinthians', 'Galatians', 'Ephesians', 'Philippians', 'Colossians', '1st Thessalonians', '2nd Thessalonians', '1st Timothy', '2nd Timothy', 'Titus', 'Philemon', 'Hebrews', 'James', '1st Peter', '2nd Peter', '1st John', '2nd John', '3rd John', 'Jude', 'Revelation'];
+  return booklist[bookNum-1];
+}
+
+function refGetVerse(b,c,v){
+  var versetext = " ";
+  versetext = getVerse(b,c,v);
+  document.all.verseColumn.innerHTML += getBookName(b);
+  document.all.verseColumn.innerHTML += c+":";
+  document.all.verseColumn.innerHTML += versetext;
+}
+
+</script>
+
+</head>
+<body>
+<body onLoad="setup()">
+
+<div class="container">
+<div class="masthead">
+<IMG class"logodisplay" src="img/masthead.jpg" alt="Holy Bible Strongs Lookup">
+
+<hr>
+
+<form onsubmit="return false">
+
+<select name="book" id=book>
+<option value="1">Genesis
+<option value="2">Exodus
+<option value="3">Leviticus
+<option value="4">Numbers
+<option value="5">Deuteronomy
+<option value="6">Joshua
+<option value="7">Judges
+<option value="8">Ruth
+<option value="9">1st Samuel
+<option value="10">2nd Samuel
+<option value="11">1st Kings
+<option value="12">2nd Kings
+<option value="13">1st Chronicles
+<option value="14">2nd Chronicles
+<option value="15">Ezra
+<option value="16">Nehemiah
+<option value="17">Esther
+<option value="18">Job
+<option value="19">Psalms
+<option value="20">Proverbs
+<option value="21">Ecclesiastes
+<option value="22">Song of Solomon
+<option value="23">Isaiah
+<option value="24">Jeremiah
+<option value="25">Lamentations
+<option value="26">Ezekiel
+<option value="27">Daniel
+<option value="28">Hosea
+<option value="29">Joel
+<option value="30">Amos
+<option value="31">Obadiah
+<option value="32">Jonah
+<option value="33">Micah
+<option value="34">Nahum
+<option value="35">Habakkuk
+<option value="36">Zephaniah
+<option value="37">Haggai
+<option value="38">Zechariah
+<option value="39">Malachi
+<option value="40">Matthew
+<option value="41">Mark
+<option value="42">Luke
+<option value="43">John
+<option value="44">Acts
+<option value="45">Romans
+<option value="46">1st Corinthians
+<option value="47">2nd Corinthians
+<option value="48">Galatians
+<option value="49">Ephesians
+<option value="50">Philippians
+<option value="51">Colossians
+<option value="52">1st Thessalonians
+<option value="53">2nd Thessalonians
+<option value="54">1st Timothy
+<option value="55">2nd Timothy
+<option value="56">Titus
+<option value="57">Philemon
+<option value="58">Hebrews
+<option value="59">James
+<option value="60">1st Peter
+<option value="61">2nd Peter
+<option value="62">1st John
+<option value="63">2nd John
+<option value="64">3rd John
+<option value="65">Jude
+<option value="66">Revelation
+</select>
+
+<input name="chapter" type="text" MAXLENGTH=3  id=chapter> : 
+<input name="verse" type="text" MAXLENGTH=3 id=verse> Number of Verses:
+<input name="numVerse" type="text" MAXLENGTH=3 id=numVerse>
+<input type="submit" onclick="javascript: getresponse()" name="submit" value="Submit" />
+
+
+</div>
+
+<div id="verseColumn"></div>
+<div id="strongContainer">
+<div id="strongColumn"></div>
+<div id="refColumn"></div>
+</div>
+
+</div>
+</form>
+</body>
+</html>
